@@ -43,36 +43,37 @@ def verify_token(token: str = Depends(oauth2_scheme)):
         raise credentials_exception
     return user_id  # return the user identifier if you want to use it later
 
+
 def decodeJWT(jwtoken: str):
     try:
-        payload = jwt.decode(jwtoken,SECRET_KEY,ALGORITHM) #decodes the JWT token using the secret key and algorithm
-        return payload #returns the decoded data if info is correct
+        payload = jwt.decode(jwtoken,SECRET_KEY,ALGORITHM)
+        return payload
     except InvalidTokenError:
-        return None #returns none if code is expired or fake
+        return None
     
-# this class lets FastAPI check for valid tokens when someone calls a protected API route
 class JWTBearer(HTTPBearer):
     def __init__(self, auto_error: bool = True):
-        super(JWTBearer, self).__init__(auto_error=auto_error) #calls parent class (JWTBearer) and error is raised if there is a problem with the token
+        super(JWTBearer, self).__init__(auto_error=auto_error)
 
-    async def __call__(self, request: Request)-> Optional[str]: #runs every time a user tries to access a protected route
-        credentials: HTTPAuthorizationCredentials = await super(JWTBearer, self).__call__(request) #checks the Authorization header to get the token
+    async def __call__(self, request: Request) -> Optional[str]:
+        credentials: HTTPAuthorizationCredentials = await super(JWTBearer, self).__call__(request)
         if credentials:
             if not credentials.scheme == "Bearer":
-                raise HTTPException(status_code=403, detail="Invalid authentication scheme.") #If there's no Bearer token, raise a 403 error
-            token = credentials.credentials #pulls out the actual token string and passes it to verify_jwt
-            if not self.verify_jwt(token): 
-                raise HTTPException(status_code=403, detail="Invalid token or expired token.") #if it fails verification, it raises another 403
-            return token #if everything is fine, it returns the token to identify the user in the route later
+                raise HTTPException(status_code=403, detail="Invalid authentication scheme.")
+            token = credentials.credentials
+            if not self.verify_jwt(token):
+                raise HTTPException(status_code=403, detail="Invalid token or expired token.")
+            return token
         else:
             raise HTTPException(status_code=403, detail="Invalid authorization code.")
 
-#tries to decode the JWT
     def verify_jwt(self, jwtoken: str) -> bool:
         try:
             payload = decodeJWT(jwtoken)
-            return True #if it succeeds, token is valid → returns True
+            return True
         except jwt.ExpiredSignatureError:
             return False
         except jwt.JWTError:
-            return False #if token is expired or broken, returns False
+            return False
+        
+
