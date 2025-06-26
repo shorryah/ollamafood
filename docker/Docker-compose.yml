@@ -1,25 +1,27 @@
-version: "3.8" #version of docker compose syntax being used
+version: "3.8"
 
-services:   #gives the different service containers that will run
-  api:  
-    build: .   # Build the Docker image from the Dockerfile
+services:
+  api:
+    build: .
     ports:
-      - "8000:8000"  #maps port 8000 from computer to port 8000 in the container
+      - "8000:8000"
     depends_on:
-      - mongodb   #shows that api depends on the database
+      - mongodb
+    volumes:
+      - ./src:/usr/local/app/src  
+    environment:
+      MONGO_URI: mongodb://shorryah:mongo123@mongodb:27017/user_db?authSource=admin
 
   mongodb:
-    image: mongo:latest    #use the latest MongoDB Docker image
+    image: mongo:latest
     ports:
-      - "27017:27017"    #maps port 27017 from computer to port 27017 in the container
-    
+      - "27017:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: shorryah
       MONGO_INITDB_ROOT_PASSWORD: mongo123
       MONGO_INITDB_DATABASE: user_db
-
     volumes:
       - mongodata:/data/db
 
-volumes:    #for data that is beyond the containers
+volumes:
   mongodata:
