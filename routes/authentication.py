@@ -22,6 +22,6 @@ def login(login_req: LoginRequest):
     if not success:
         raise HTTPException(status_code=401, detail=data) #error message
     
-    access_token_expires = timedelta(minutes=30)
-    access_token = create_access_token(data={"sub": login_req.email}, expires_delta=access_token_expires)
-    return {"access_token": access_token,"token_type": "bearer"}
+    access_token_expires = timedelta(minutes=30) #token has a lifespan of 30 mins
+    access_token = create_access_token(data={"sub": login_req.email}, expires_delta=access_token_expires) #stores email under sub and expiry info
+    return {"access_token": access_token,"token_type": "bearer"} #returns the JWT token
